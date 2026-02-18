@@ -25,25 +25,31 @@ class AIService {
   String? lastError;
 
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-  static const String _model = 'gemini-2.5-flash-lite';
+  static const String _model = 'gemini-2.0-flash';
 
   /// System prompt - Senior Software Engineer rolü
   static const String _systemPrompt = '''
-You are a coding quiz generator. Generate one Python question.
+You are a Senior Software Engineer creating coding quiz questions. Generate ONE unique Python question.
 
-Rules:
-- Use creative variable names and real-world scenarios
-- Code: 4-8 lines
-- 4 plausible options
-- Pick ONE type: "output" (predict output), "missing_code" (fill blank "_____"), or "debug" (find buggy line)
+CRITICAL RULES FOR VARIETY:
+- NEVER repeat the same code pattern. Each question MUST use DIFFERENT variables, functions, and logic.
+- Use creative, descriptive variable names from real-world contexts (shopping_cart, student_scores, recipe_ingredients — NOT x, y, a, b).
+- Mix different Python concepts: string methods, dictionary operations, set operations, tuple unpacking, enumerate, zip, map, filter, list comprehensions, generators, exception handling, class inheritance, magic methods, decorators, closures.
+- Code snippets MUST be between 5-12 lines. Make them substantial enough to require careful reading.
+- The 4 answer options MUST all be plausible — include common mistakes as wrong answers.
 
-DIFFICULTY IS CRITICAL - you MUST follow the difficulty level:
-- Easy: basic syntax, simple prints, single operations, no tricks
-- Medium: 2-3 concepts combined, minor edge cases, moderate logic
-- Hard: subtle traps, scope/mutability issues, complex logic, tricky edge cases
+DIFFICULTY LEVELS (you MUST follow this strictly):
+- Easy: single concept, straightforward logic, basic operations. A beginner solves in 10 seconds.
+- Medium: 2-3 concepts combined, minor edge cases, requires tracing through code carefully.
+- Hard: subtle traps (mutable defaults, scope issues, operator precedence, shallow copy, generator exhaustion, closure late binding). Even experienced developers should pause and think.
 
-JSON only, no extra text:
-{"type":"output","question_text":"...","code_snippet":"...","options":["a","b","c","d"],"correct_index":0,"explanation":"..."}
+Question types (pick ONE randomly):
+1. type: "output" — "What is the output of this code?" The code must have a non-obvious output that requires careful mental execution.
+2. type: "missing_code" — Show code with one line replaced by "_____" and ask what should fill the blank to achieve the described goal.
+3. type: "debug" — "Which line contains a bug?" Code with a subtle logical error.
+
+Respond with ONLY valid JSON, no markdown, no extra text:
+{"type": "output", "question_text": "...", "code_snippet": "...", "options": ["a","b","c","d"], "correct_index": 0, "explanation": "Step-by-step explanation of why the answer is correct"}
 ''';
 
   /// Initialize AI service
@@ -323,8 +329,7 @@ def maxDepth(root):
         }
       ],
       'generationConfig': {
-        'temperature': 0.85,
-        'maxOutputTokens': 512,
+        'temperature': 1.0,
         'responseMimeType': 'application/json',
       },
     });
