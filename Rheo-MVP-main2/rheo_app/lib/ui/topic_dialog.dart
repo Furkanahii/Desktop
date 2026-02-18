@@ -27,36 +27,42 @@ class Topics {
       label: 'Tümü',
       icon: Icons.grid_view_rounded,
       color: RheoColors.primary,
+      isAI: true,
     ),
     TopicOption(
       id: 'variable',
       label: 'Değişkenler',
       icon: Icons.data_object_rounded,
       color: Color(0xFF4CAF50),
+      isAI: true,
     ),
     TopicOption(
       id: 'loop',
       label: 'Döngüler',
       icon: Icons.loop_rounded,
       color: Color(0xFFFF9800),
+      isAI: true,
     ),
     TopicOption(
       id: 'if_else',
       label: 'Koşullar',
       icon: Icons.call_split_rounded,
       color: Color(0xFF2196F3),
+      isAI: true,
     ),
     TopicOption(
       id: 'function',
       label: 'Fonksiyonlar',
       icon: Icons.functions_rounded,
       color: Color(0xFF9C27B0),
+      isAI: true,
     ),
     TopicOption(
       id: 'list',
       label: 'Listeler',
       icon: Icons.list_alt_rounded,
       color: Color(0xFFE91E63),
+      isAI: true,
     ),
   ];
 
