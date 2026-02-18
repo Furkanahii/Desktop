@@ -29,25 +29,21 @@ class AIService {
 
   /// System prompt - Senior Software Engineer rolü
   static const String _systemPrompt = '''
-You are a Senior Software Engineer and coding instructor. Generate a unique, creative coding question.
-All code snippets must be in Python.
+You are a coding quiz generator. Generate one Python question.
 
-CRITICAL RULES FOR VARIETY:
-- NEVER repeat the same code pattern. Each question must use DIFFERENT variables, functions, and logic.
-- Use creative variable names (not just x, y, a, b). Use real-world examples: shopping carts, student grades, game scores, weather data, recipe ingredients, etc.
-- Mix different Python concepts: string methods, dictionary operations, set operations, tuple unpacking, enumerate, zip, map, filter, list comprehensions, generators, decorators, context managers, exception handling, class inheritance, magic methods.
-- Make code snippets between 4-10 lines.
+Rules:
+- Use creative variable names and real-world scenarios
+- Code: 4-8 lines
+- 4 plausible options
+- Pick ONE type: "output" (predict output), "missing_code" (fill blank "_____"), or "debug" (find buggy line)
 
-Randomly pick ONE of these question types (include the "type" field in your JSON):
+DIFFICULTY IS CRITICAL - you MUST follow the difficulty level:
+- Easy: basic syntax, simple prints, single operations, no tricks
+- Medium: 2-3 concepts combined, minor edge cases, moderate logic
+- Hard: subtle traps, scope/mutability issues, complex logic, tricky edge cases
 
-1. type: "output" — "What is the output of this code?" Code with tricky output due to edge cases, operator precedence, mutability, or scope.
-2. type: "missing_code" — Show code with one line replaced by "_____" and ask what the missing line should be.
-3. type: "debug" — "Which line contains a bug?" Code with a subtle off-by-one error, wrong comparison, or logic flaw.
-
-The 4 options must be realistic and plausible. Include actual output values, code lines, or error descriptions.
-
-Output strictly in JSON format with no extra text:
-{"type": "output", "question_text": "...", "code_snippet": "...", "options": ["a","b","c","d"], "correct_index": 0, "explanation": "..."}
+JSON only, no extra text:
+{"type":"output","question_text":"...","code_snippet":"...","options":["a","b","c","d"],"correct_index":0,"explanation":"..."}
 ''';
 
   /// Initialize AI service
@@ -63,7 +59,7 @@ Output strictly in JSON format with no extra text:
       
       // Web'de dotenv bazen yüklenemeyebilir, fallback
       if (apiKey == null || apiKey.isEmpty || apiKey == 'your_gemini_api_key_here') {
-        apiKey = const String.fromEnvironment('GEMINI_API_KEY', defaultValue: 'AIzaSyAD_5KZm_jH5_5VOrX0f60kLgkdf5L4NOc');
+        apiKey = const String.fromEnvironment('GEMINI_API_KEY', defaultValue: 'AIzaSyDohNFLIl_xfzdvjGTKzNnNaOkZU6jz1Ws');
         debugPrint('🔑 Using fallback API key');
       }
       
@@ -260,7 +256,7 @@ def maxDepth(root):
   ) async {
     final userMessage = _getRandomFocus(topicLabel) + 
         '\nDifficulty: $difficultyLabel. '
-        'Make it tricky with subtle edge cases.';
+        '${_getDifficultyInstruction(difficultyLabel)}';
 
     final url = '$_baseUrl/$_model:generateContent?key=$_apiKey';
 
@@ -274,7 +270,8 @@ def maxDepth(root):
         }
       ],
       'generationConfig': {
-        'temperature': 0.9,
+        'temperature': 0.7,
+        'maxOutputTokens': 512,
         'responseMimeType': 'application/json',
       },
     });
@@ -329,7 +326,7 @@ def maxDepth(root):
     return Question(
       id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
       type: questionType,
-      difficulty: 2,
+      difficulty: _currentDifficulty,
       topic: topicId,
       codeSnippet: json['code_snippet'] as String,
       questionText: json['question_text'] as String,
@@ -408,11 +405,25 @@ def maxDepth(root):
     }
   }
 
+  int _currentDifficulty = 2;
+
   String _getDifficultyLabel(int difficulty) {
+    _currentDifficulty = difficulty;
     switch (difficulty) {
       case 1: return 'Easy';
       case 3: return 'Hard';
       default: return 'Medium';
+    }
+  }
+
+  String _getDifficultyInstruction(String level) {
+    switch (level) {
+      case 'Easy':
+        return 'This MUST be EASY: simple variable assignment, basic print, single if/else, basic loop. A beginner should solve it in 10 seconds.';
+      case 'Hard':
+        return 'This MUST be HARD: use subtle traps like mutable defaults, scope issues, operator precedence, shallow copy gotchas, or tricky recursion. Even experienced devs should think twice.';
+      default:
+        return 'This should be MEDIUM difficulty: combine 2-3 concepts, include a minor edge case, require some thought but no deep tricks.';
     }
   }
 
