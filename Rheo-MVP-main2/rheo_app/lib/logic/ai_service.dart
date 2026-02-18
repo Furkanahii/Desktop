@@ -25,7 +25,7 @@ class AIService {
   String? lastError;
 
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-  static const String _model = 'gemini-2.0-flash';
+  static const String _model = 'gemini-2.0-flash-lite';
 
   /// System prompt - Senior Software Engineer rolü
   static const String _systemPrompt = '''
@@ -59,15 +59,17 @@ Respond with ONLY valid JSON, no markdown, no extra text:
     try {
       _cacheBox = await Hive.openBox('ai_questions_cache');
 
-      // dotenv'den API key al, yoksa doğrudan fallback kullan
-      var apiKey = dotenv.env['GEMINI_API_KEY'];
-      debugPrint('🔑 dotenv GEMINI_API_KEY: ${apiKey != null ? "found (${apiKey.length} chars)" : "null"}');
-      
-      // Web'de dotenv bazen yüklenemeyebilir, environment variable'dan al
-      if (apiKey == null || apiKey.isEmpty || apiKey == 'your_gemini_api_key_here') {
-        apiKey = const String.fromEnvironment('GEMINI_API_KEY');
-        if (apiKey.isNotEmpty) {
-          debugPrint('🔑 Using environment variable API key');
+      // 1. Önce dart-define'dan kontrol et (web build için en güvenilir)
+      var apiKey = const String.fromEnvironment('GEMINI_API_KEY');
+      if (apiKey.isNotEmpty) {
+        debugPrint('🔑 Using dart-define API key (${apiKey.length} chars)');
+      } else {
+        // 2. dotenv'den kontrol et (mobil ve dev server için)
+        apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+        if (apiKey.isNotEmpty && apiKey != 'your_gemini_api_key_here') {
+          debugPrint('🔑 Using dotenv API key (${apiKey.length} chars)');
+        } else {
+          apiKey = '';
         }
       }
       
