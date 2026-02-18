@@ -134,17 +134,17 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/mascot.png"
+  image_path: "assets/rheo_mascot_icon.png"
   adaptive_icon_background: "#0D0D0F"
-  adaptive_icon_foreground: "assets/mascot.png"
+  adaptive_icon_foreground: "assets/rheo_mascot_icon.png"
 
 # Flutter Native Splash configuration
 flutter_native_splash:
   color: "#0D1B2A"
-  image: "assets/mascot.png"
+  image: "assets/rheo_mascot_icon.png"
   android: true
   ios: true
   web: true
   android_12:
     color: "#0D1B2A"
-    image: "assets/mascot.png"
+    image: "assets/rheo_mascot_icon.png"
