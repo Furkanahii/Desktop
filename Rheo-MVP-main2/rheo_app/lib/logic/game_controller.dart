@@ -41,29 +41,44 @@ class GameController {
   /// [language] filter: 'python', 'java', 'javascript', or null for all
   /// [topic] filter: 'variable', 'loop', 'if_else', etc or null for all
   Future<void> loadQuestions({int? maxQuestions, String? language, String? topic}) async {
-    final jsonString = await rootBundle.loadString('assets/questions.json');
-    final List<dynamic> jsonList = json.decode(jsonString);
-    _questions = jsonList.map((json) => Question.fromJson(json)).toList();
-    
-    // Filter by language if specified
-    if (language != null && language.isNotEmpty) {
-      _questions = _questions.where((q) => q.language == language).toList();
-    }
-    
-    // Filter by topic if specified
-    if (topic != null && topic.isNotEmpty) {
-      _questions = _questions.where((q) => q.topic == topic).toList();
-    }
-    
-    // Filter by difficulty based on ELO
-    _filterByEloDifficulty();
-    
-    // Sort by difficulty based on user ELO
-    _sortQuestionsByElo();
-    
-    // Limit questions if specified
-    if (maxQuestions != null && _questions.length > maxQuestions) {
-      _questions = _questions.take(maxQuestions).toList();
+    try {
+      final jsonString = await rootBundle.loadString('assets/questions.json');
+      final List<dynamic> jsonList = json.decode(jsonString);
+      
+      // Parse questions with error handling per question
+      _questions = [];
+      for (final jsonItem in jsonList) {
+        try {
+          _questions.add(Question.fromJson(jsonItem));
+        } catch (e) {
+          // Skip bad questions silently
+          continue;
+        }
+      }
+      
+      // Filter by language if specified
+      if (language != null && language.isNotEmpty) {
+        _questions = _questions.where((q) => q.language == language).toList();
+      }
+      
+      // Filter by topic if specified
+      if (topic != null && topic.isNotEmpty) {
+        _questions = _questions.where((q) => q.topic == topic).toList();
+      }
+      
+      // Filter by difficulty based on ELO
+      _filterByEloDifficulty();
+      
+      // Sort by difficulty based on user ELO
+      _sortQuestionsByElo();
+      
+      // Limit questions if specified
+      if (maxQuestions != null && _questions.length > maxQuestions) {
+        _questions = _questions.take(maxQuestions).toList();
+      }
+    } catch (e) {
+      // If everything fails, return empty list
+      _questions = [];
     }
     
     _currentIndex = 0;
