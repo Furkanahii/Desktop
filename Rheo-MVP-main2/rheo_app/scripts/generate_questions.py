@@ -16,7 +16,7 @@ API_KEY = os.environ.get("GEMINI_API_KEY", "")
 if not API_KEY:
     print("ERROR: GEMINI_API_KEY environment variable not set!")
     sys.exit(1)
-MODEL = "gemini-flash-lite-latest"
+MODEL = "gemini-2.5-flash"
 OUTPUT_DIR = Path(__file__).parent.parent / "assets" / "questions"
 QUESTIONS_PER_BATCH = 10  # Questions per API call
 TOTAL_PER_FILE = 100  # Total questions per topic/difficulty file

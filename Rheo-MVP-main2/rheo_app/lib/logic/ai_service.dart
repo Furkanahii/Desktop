@@ -25,7 +25,7 @@ class AIService {
   String? lastError;
 
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-  static const String _model = 'gemini-2.0-flash-lite';
+  static const String _model = 'gemini-2.5-flash';
 
   /// System prompt - Senior Software Engineer rolü
   static const String _systemPrompt = '''
