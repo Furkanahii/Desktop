@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../data/question_model.dart';
 import '../data/user_progress.dart';
@@ -82,9 +83,18 @@ class GameController {
       _mediumPool = allQuestions.where((q) => q.difficulty == 2).toList()..shuffle();
       _hardPool = allQuestions.where((q) => q.difficulty == 3).toList()..shuffle();
       
+      debugPrint('🎯 Pools: easy=${_easyPool.length}, medium=${_mediumPool.length}, hard=${_hardPool.length}');
+      
       // Build adaptive question list
       final totalCount = maxQuestions ?? 10;
       _questions = _buildAdaptiveQuestionList(totalCount);
+      
+      // Log the question order
+      for (int i = 0; i < _questions.length; i++) {
+        final q = _questions[i];
+        final label = q.difficulty == 1 ? 'KOLAY' : q.difficulty == 2 ? 'ORTA' : 'ZOR';
+        debugPrint('  Q${i+1}: $label (diff=${q.difficulty}) topic=${q.topic} lang=${q.language}');
+      }
       
     } catch (e) {
       _questions = [];
