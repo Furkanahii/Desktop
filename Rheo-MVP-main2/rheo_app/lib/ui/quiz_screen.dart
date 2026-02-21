@@ -223,10 +223,34 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     final summary = _controller.getSessionSummary();
     HapticService.achievement();
     
+    // Fire confetti! 🎉
+    _confettiController.play();
+    
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
+      builder: (ctx) => Stack(
+        children: [
+          // Confetti overlay
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Color(0xFF6C63FF), Color(0xFF00D2FF), Color(0xFFFF6B6B),
+                Color(0xFF4ECDC4), Color(0xFFFFD93D), Color(0xFFFF8A5C),
+              ],
+              numberOfParticles: 25,
+              maxBlastForce: 20,
+              minBlastForce: 5,
+              emissionFrequency: 0.05,
+              gravity: 0.15,
+            ),
+          ),
+          // Result dialog
+          Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(24),
@@ -292,6 +316,8 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
             ],
           ),
         ),
+        ),
+        ],
       ),
     );
   }

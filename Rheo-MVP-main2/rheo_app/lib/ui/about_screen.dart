@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'animations.dart';
 import 'widgets/mascot_widget.dart';
+import 'privacy_policy_screen.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -167,9 +168,27 @@ class AboutScreen extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // Footer
+                // Privacy Policy Button
                 StaggeredFadeIn(
                   index: 6,
+                  child: GlassCard(
+                    padding: const EdgeInsets.all(4),
+                    child: ListTile(
+                      leading: Icon(Icons.shield_rounded, color: RheoColors.accent),
+                      title: const Text('Gizlilik Politikası', 
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded, color: RheoColors.textMuted, size: 16),
+                      onTap: () => Navigator.push(context, 
+                        MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Footer
+                StaggeredFadeIn(
+                  index: 7,
                   child: Column(
                     children: [
                       Text(
