@@ -15,6 +15,7 @@ import 'leaderboard_screen.dart';
 import 'topic_dialog.dart';
 import 'profile_screen.dart';
 import 'initial_rank_screen.dart';
+import '../data/app_strings.dart';
 
 /// Language-specific accent colors (text) — delegates to RheoTheme
 Color _langAccent(ProgrammingLanguage lang) => RheoTheme.langText(lang);
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20)),
               title: Text(
-                'Günlük Hedef',
+                S.gunlukHedef,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: RheoTheme.textColor,
@@ -328,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Icon(Icons.shield_outlined, color: RheoTheme.textColor, size: 24),
                             const SizedBox(height: 4),
                             Text(
-                              'Lig',
+                              S.lig,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -337,7 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Yakında',
+                              S.yakinda,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: RheoTheme.textMuted,
@@ -364,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Doğru Seri',
+                              S.dogruSeri,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: RheoTheme.textMuted,
@@ -411,7 +412,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Row(
                                     children: [
                                       Text(
-                                        'Günlük Hedef',
+                                        S.gunlukHedef,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
@@ -469,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
               StaggeredFadeIn(
                 index: 4,
                 child: Text(
-                  'MOD SEÇ',
+                  S.modSec,
                   style: TextStyle(
                     color: RheoTheme.textColor.withAlpha(120),
                     fontSize: 12,
@@ -487,8 +488,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   accentColor: accent,
                   cardBg: cardBg,
                   icon: Icons.code_rounded,
-                  title: 'Çıktı Tahmini',
-                  subtitle: 'Kodu oku, çıktıyı tahmin et',
+                  title: S.ciktiTahmini,
+                  subtitle: S.ciktiTahminiSub,
                   onTap: () async {
                     final selectedTopic = await showTopicDialog(context);
                     if (selectedTopic != null && mounted) {
@@ -509,8 +510,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   accentColor: accent,
                   cardBg: cardBg,
                   icon: Icons.bug_report_rounded,
-                  title: 'Bug Hunter',
-                  subtitle: 'Hatalı satırı bul',
+                  title: S.bugHunter,
+                  subtitle: S.bugHunterSub,
                   onTap: () => _navigateTo(const BugHuntScreen()),
                 ),
               ),
@@ -523,8 +524,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   accentColor: accent,
                   cardBg: cardBg,
                   icon: Icons.timer_rounded,
-                  title: 'Time Attack',
-                  subtitle: 'Zamana karşı yarış',
+                  title: S.timeAttack,
+                  subtitle: S.timeAttackSub,
                   onTap: () => _navigateTo(const TimeAttackScreen()),
                 ),
               ),
@@ -924,7 +925,7 @@ class _DailyGoalHoverButtonState extends State<_DailyGoalHoverButton> {
               Text('🎯', style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
               Text(
-                'Günlük hedefini belirle!',
+                S.gunlukHedefBelirle,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,

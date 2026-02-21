@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'animations.dart';
+import '../data/app_strings.dart';
 
 /// Topic options for filtering
 class TopicOption {
@@ -17,6 +18,34 @@ class TopicOption {
     required this.color,
     this.isAI = false,
   });
+
+  /// Returns localized label based on current locale
+  String get localizedLabel {
+    const idToKey = {
+      '': 'tumu', 'variable': 'degiskenler', 'loop': 'donguler',
+      'if_else': 'kosullar', 'function': 'fonksiyonlar', 'list': 'listeler',
+      'string': 'stringler', 'array': 'diziler', 'oop': 'oopLabel',
+      'recursion': 'ozyineleme', 'sorting': 'siralama', 'stack_queue': 'yiginKuyruk',
+    };
+    if (isAI) return label; // AI topics keep English names
+    final key = idToKey[id];
+    if (key == null) return label;
+    switch(key) {
+      case 'tumu': return S.tumu;
+      case 'degiskenler': return S.degiskenler;
+      case 'donguler': return S.donguler;
+      case 'kosullar': return S.kosullar;
+      case 'fonksiyonlar': return S.fonksiyonlar;
+      case 'listeler': return S.listeler;
+      case 'stringler': return S.stringler;
+      case 'diziler': return S.diziler;
+      case 'oopLabel': return S.oopLabel;
+      case 'ozyineleme': return S.ozyineleme;
+      case 'siralama': return S.siralama;
+      case 'yiginKuyruk': return S.yiginKuyruk;
+      default: return label;
+    }
+  }
 }
 
 /// Available topics
@@ -96,7 +125,7 @@ class Topics {
     ),
   ];
 
-  /// AI destekli kategoriler
+  /// AI destekli kategoriler / AI-powered categories
   static const List<TopicOption> aiTopics = [
     TopicOption(
       id: 'ai_arrays',
@@ -156,7 +185,7 @@ Future<TopicOption?> showTopicDialog(BuildContext context) {
             ),
             const SizedBox(height: 20),
             Text(
-              'Konu Seç',
+              S.konuSec,
               style: TextStyle(
                 color: RheoTheme.textColor,
                 fontSize: 18,
@@ -165,7 +194,7 @@ Future<TopicOption?> showTopicDialog(BuildContext context) {
             ),
             const SizedBox(height: 6),
             Text(
-              'Çalışmak istediğin konuyu seç',
+              S.konuSecSub,
               style: TextStyle(color: RheoTheme.textMuted, fontSize: 13),
             ),
             const SizedBox(height: 20),
@@ -193,7 +222,7 @@ Future<TopicOption?> showTopicDialog(BuildContext context) {
                       Icon(Icons.auto_awesome, color: const Color(0xFF00BCD4), size: 16),
                       const SizedBox(width: 6),
                       Text(
-                        'AI Destekli',
+                        S.aiDestekli,
                         style: TextStyle(
                           color: const Color(0xFF00BCD4),
                           fontSize: 12,
@@ -311,7 +340,7 @@ class _TopicTileButtonState extends State<_TopicTileButton> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.topic.label,
+                      widget.topic.localizedLabel,
                       style: TextStyle(
                         color: RheoTheme.textColor,
                         fontSize: 14,

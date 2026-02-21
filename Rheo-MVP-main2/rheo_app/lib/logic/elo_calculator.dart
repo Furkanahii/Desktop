@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../data/app_strings.dart';
 
 /// ELO Rating Calculator
 /// Based on chess ELO system adapted for quiz questions
@@ -58,12 +59,7 @@ class EloCalculator {
 
   /// Get ELO rank title
   static String getRankTitle(int elo) {
-    if (elo < 200) return 'Çaylak';
-    if (elo < 400) return 'Yükselen';
-    if (elo < 600) return 'Deneyimli';
-    if (elo < 800) return 'Uzman';
-    if (elo < 1000) return 'Usta';
-    return 'Üstat';
+    return S.getRankName(elo);
   }
 
   /// Get ELO rank emoji

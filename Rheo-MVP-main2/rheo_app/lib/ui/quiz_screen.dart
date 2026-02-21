@@ -10,6 +10,7 @@ import '../logic/ai_service.dart';
 import 'theme.dart';
 import 'animations.dart';
 import 'widgets/mascot_widget.dart';
+import '../data/app_strings.dart';
 
 class QuizScreen extends StatefulWidget {
   final String? topic;
@@ -116,11 +117,11 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           final errorDetail = aiService.lastError;
           String errorMsg;
           if (errorDetail != null && errorDetail.contains('quota')) {
-            errorMsg = 'API kota limiti aşıldı.\nBirkaç dakika bekleyip tekrar dene.';
+            errorMsg = S.apiKotaHatasi;
           } else if (errorDetail != null && errorDetail.contains('API key')) {
-            errorMsg = 'API key geçersiz.\n.env dosyasını kontrol et.';
+            errorMsg = S.apiKeyHatasi;
           } else {
-            errorMsg = 'AI sorusu üretilemedi.\nİnternet bağlantını kontrol et.';
+            errorMsg = S.aiSoruHatasi;
           }
           setState(() {
             _isGeneratingAI = false;
@@ -268,9 +269,9 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               MascotResultCard(accuracy: summary['accuracy']),
               const SizedBox(height: 12),
               _buildStatRow('Skor', '${summary['score']}', Colors.amber),
-              _buildStatRow('Doğru', '${summary['correct']}', RheoColors.success),
-              _buildStatRow('Yanlış', '${summary['wrong']}', RheoColors.error),
-              _buildStatRow('Başarı', '%${summary['accuracy']}', RheoColors.primary),
+              _buildStatRow(S.dogru, '${summary['correct']}', RheoColors.success),
+              _buildStatRow(S.yanlis, '${summary['wrong']}', RheoColors.error),
+              _buildStatRow(S.basari, '%${summary['accuracy']}', RheoColors.primary),
               Divider(color: RheoTheme.textMuted.withAlpha(60), height: 24),
               _buildStatRow('ELO', '${summary['elo']}', 
                   Color(EloCalculator.getRankColor(summary['elo']))),
@@ -371,7 +372,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Soru $_aiQuestionCount/$_aiMaxQuestions',
+                    S.soruN(_aiQuestionCount, _aiMaxQuestions),
                     style: TextStyle(color: RheoTheme.textMuted.withAlpha(120), fontSize: 12),
                   ),
                 ],
@@ -433,7 +434,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     if (question == null) {
       return Scaffold(
         backgroundColor: RheoTheme.scaffoldBg(),
-        body: Center(child: Text('Soru yok', style: TextStyle(color: RheoTheme.textMuted))),
+        body: Center(child: Text(S.tr('Soru yok', 'No questions'), style: TextStyle(color: RheoTheme.textMuted))),
       );
     }
 
@@ -452,7 +453,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           title: Text(
             _isAIMode 
                 ? '🤖 Soru $_aiQuestionCount/$_aiMaxQuestions'
-                : 'Soru ${_controller.currentIndex + 1}/${_controller.totalQuestions}',
+                : S.soruN(_controller.currentIndex + 1, _controller.totalQuestions),
             style: TextStyle(color: RheoTheme.textColor, fontSize: 16),
           ),
           actions: [
@@ -577,7 +578,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                     
                     // Question text
                     Text(
-                      question.questionText,
+                      question.localizedQuestionText,
                       style: TextStyle(
                         fontSize: 16,
                         color: RheoTheme.textColor,
@@ -650,7 +651,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                           const Spacer(flex: 2),
                           // Result text
                           Text(
-                            _isCorrect! ? 'Doğru Cevap!' : 'Yanlış Cevap!',
+                            _isCorrect! ? S.dogruCevap : S.yanlisCevap,
                             style: TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w900,
@@ -692,7 +693,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                           Padding(
                             padding: const EdgeInsets.only(bottom: 24),
                             child: Text(
-                              'İlerlemek için tıklayınız.',
+                              S.ilerlemekIcinTikla,
                               style: TextStyle(
                                 fontSize: 13,
                                 color: RheoColors.textMuted,
