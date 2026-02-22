@@ -15,6 +15,77 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutScreenState extends State<AboutScreen> {
   int _tapCount = 0;
+  static const String _adminPin = '2026';
+
+  void _showPinDialog(BuildContext context) {
+    final pinController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: RheoTheme.cardBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.lock_rounded, color: RheoColors.primary, size: 20),
+            const SizedBox(width: 8),
+            Text('Admin PIN', style: TextStyle(color: RheoTheme.textColor, fontSize: 16)),
+          ],
+        ),
+        content: TextField(
+          controller: pinController,
+          keyboardType: TextInputType.number,
+          maxLength: 4,
+          obscureText: true,
+          autofocus: true,
+          style: TextStyle(color: RheoTheme.textColor, fontSize: 24, letterSpacing: 8, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+          decoration: InputDecoration(
+            hintText: '••••',
+            hintStyle: TextStyle(color: RheoTheme.textMuted.withAlpha(80)),
+            counterText: '',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: RheoColors.primary, width: 2),
+            ),
+          ),
+          onSubmitted: (value) {
+            Navigator.pop(ctx);
+            if (value == _adminPin) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminAnalyticsScreen()));
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(S.tr('Yanlış PIN', 'Wrong PIN')), backgroundColor: RheoColors.error),
+              );
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.tr('İptal', 'Cancel'), style: TextStyle(color: RheoTheme.textMuted)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (pinController.text == _adminPin) {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminAnalyticsScreen()));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(S.tr('Yanlış PIN', 'Wrong PIN')), backgroundColor: RheoColors.error),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: RheoColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text(S.tr('Giriş', 'Enter'), style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,9 +152,7 @@ class _AboutScreenState extends State<AboutScreen> {
                           _tapCount++;
                           if (_tapCount >= 5) {
                             _tapCount = 0;
-                            Navigator.push(context, MaterialPageRoute(
-                              builder: (_) => const AdminAnalyticsScreen(),
-                            ));
+                            _showPinDialog(context);
                           }
                         },
                         child: Container(
