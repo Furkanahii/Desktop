@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../logic/storage_service.dart';
+import '../data/app_strings.dart';
 import 'theme.dart';
 import 'animations.dart';
 
@@ -48,7 +49,7 @@ class _CustomizeProfileScreenState extends State<CustomizeProfileScreen> {
     HapticService.lightTap();
     final p = storageService.progress;
     p.nickname = _nickController.text.trim().isEmpty
-        ? 'Oyuncu'
+        ? S.oyuncu
         : _nickController.text.trim();
     p.selectedAvatarIndex = _selectedAvatar;
     storageService.saveProgress(p);
@@ -69,12 +70,12 @@ class _CustomizeProfileScreenState extends State<CustomizeProfileScreen> {
             Navigator.pop(context);
           },
         ),
-        title: Text('Profili Özelleştir',
+        title: Text(S.profiliOzellestir,
             style: TextStyle(color: RheoTheme.textColor, fontWeight: FontWeight.bold)),
         actions: [
           TextButton(
             onPressed: _save,
-            child: Text('Kaydet',
+            child: Text(S.kaydet,
                 style: TextStyle(
                     color: RheoTheme.textColor,
                     fontWeight: FontWeight.bold,
@@ -128,7 +129,7 @@ class _CustomizeProfileScreenState extends State<CustomizeProfileScreen> {
 
               // Username label + field (left-aligned)
               Text(
-                'KULLANICI ADI',
+                S.kullaniciAdi,
                 style: TextStyle(
                   color: RheoTheme.textMuted,
                   fontSize: 11,
@@ -156,7 +157,7 @@ class _CustomizeProfileScreenState extends State<CustomizeProfileScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Kullanıcı Adı',
+                      hintText: S.kullaniciAdiHint,
                       hintStyle: TextStyle(color: RheoTheme.textMuted),
                       border: InputBorder.none,
                       counterText: '',
@@ -169,7 +170,7 @@ class _CustomizeProfileScreenState extends State<CustomizeProfileScreen> {
 
               // Avatar grid header
               Text(
-                'AVATAR SEÇ',
+                S.avatarSec,
                 style: TextStyle(
                   color: RheoTheme.textMuted,
                   fontSize: 11,

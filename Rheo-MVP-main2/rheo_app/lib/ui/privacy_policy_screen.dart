@@ -98,7 +98,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 _buildSection(6, 'İletişim', Icons.email_rounded, [
                   'Gizlilik politikası hakkında sorularınız için:',
-                  '📧 rheoapp@gmail.com',
+                  '📧 rheocode.app@gmail.com',
                 ]),
 
                 const SizedBox(height: 24),

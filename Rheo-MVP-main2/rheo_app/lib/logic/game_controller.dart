@@ -7,8 +7,8 @@ import '../data/user_progress.dart';
 import 'elo_calculator.dart';
 import 'storage_service.dart';
 
-/// Controls quiz logic with adaptive difficulty system.
-/// Questions start EASY, then progress to MEDIUM and HARD based on performance.
+/// Controls quiz logic with rank-based difficulty distribution.
+/// Questions are selected based on user's ELO rank at session start.
 class GameController {
   List<Question> _questions = [];
   int _currentIndex = 0;
@@ -16,15 +16,10 @@ class GameController {
   int _sessionCorrect = 0;
   int _sessionWrong = 0;
 
-  // Adaptive difficulty pools
+  // Difficulty pools
   List<Question> _easyPool = [];
   List<Question> _mediumPool = [];
   List<Question> _hardPool = [];
-  
-  // Adaptive difficulty state
-  int _currentDifficulty = 1; // 1=easy, 2=medium, 3=hard
-  int _consecutiveCorrect = 0;
-  int _consecutiveWrong = 0;
 
   // Getters
   Question? get currentQuestion => 
@@ -37,7 +32,6 @@ class GameController {
   int get sessionWrong => _sessionWrong;
   bool get isFinished => _currentIndex >= _questions.length;
   double get progress => _questions.isEmpty ? 0 : _currentIndex / _questions.length;
-  int get currentDifficulty => _currentDifficulty;
 
   // User progress from storage
   UserProgress get userProgress => storageService.progress;
@@ -51,8 +45,8 @@ class GameController {
     await storageService.init();
   }
 
-  /// Load questions from assets/questions.json with adaptive difficulty.
-  /// Session of 10 questions: starts EASY, adapts based on performance.
+  /// Load questions from assets/questions.json with rank-based difficulty.
+  /// Session questions are distributed based on user's current rank.
   Future<void> loadQuestions({int? maxQuestions, String? language, String? topic}) async {
     try {
       final jsonString = await rootBundle.loadString('assets/questions.json');
@@ -85,9 +79,9 @@ class GameController {
       
       debugPrint('🎯 Pools: easy=${_easyPool.length}, medium=${_mediumPool.length}, hard=${_hardPool.length}');
       
-      // Build adaptive question list
+      // Build rank-based question list
       final totalCount = maxQuestions ?? 10;
-      _questions = _buildAdaptiveQuestionList(totalCount);
+      _questions = _buildRankQuestionList(totalCount);
       
       // Log the question order
       for (int i = 0; i < _questions.length; i++) {
@@ -104,21 +98,44 @@ class GameController {
     _sessionScore = 0;
     _sessionCorrect = 0;
     _sessionWrong = 0;
-    _currentDifficulty = 1; // Always start EASY
-    _consecutiveCorrect = 0;
-    _consecutiveWrong = 0;
   }
 
-  /// Build initial question list: start with easy, include all difficulties.
-  /// Pattern for 10 questions: 3 easy → 4 medium → 3 hard
-  /// Real-time adaptation happens in checkAnswer().
-  List<Question> _buildAdaptiveQuestionList(int count) {
+  /// Build initial question list with rank-based difficulty distribution.
+  /// Çaylak (ELO < 200):   80% easy, 20% medium, 0% hard
+  /// Yükselen (200-399):   60% easy, 40% medium, 0% hard
+  /// Deneyimli (400-599):  40% easy, 50% medium, 10% hard
+  /// Uzman (600-799):      40% easy, 40% medium, 20% hard
+  /// Usta (800-999):       30% easy, 40% medium, 30% hard
+  /// Üstat (1000+):        30% easy, 30% medium, 40% hard
+  List<Question> _buildRankQuestionList(int count) {
     final rng = Random();
     final List<Question> result = [];
+    final elo = storageService.progress.elo;
     
-    // Calculate how many of each difficulty
-    final easyCount = (count * 0.3).ceil().clamp(1, _easyPool.length);
-    final hardCount = (count * 0.3).ceil().clamp(0, _hardPool.length);
+    // Rank-based difficulty ratios
+    double easyRatio, mediumRatio, hardRatio;
+    if (elo < 200) {
+      // Çaylak: mostly easy
+      easyRatio = 0.80; mediumRatio = 0.20; hardRatio = 0.0;
+    } else if (elo < 400) {
+      // Yükselen: easy + some medium
+      easyRatio = 0.60; mediumRatio = 0.40; hardRatio = 0.0;
+    } else if (elo < 600) {
+      // Deneyimli: balanced with a touch of hard
+      easyRatio = 0.40; mediumRatio = 0.50; hardRatio = 0.10;
+    } else if (elo < 800) {
+      // Uzman: balanced
+      easyRatio = 0.40; mediumRatio = 0.40; hardRatio = 0.20;
+    } else if (elo < 1000) {
+      // Usta: harder mix
+      easyRatio = 0.30; mediumRatio = 0.40; hardRatio = 0.30;
+    } else {
+      // Üstat: challenging
+      easyRatio = 0.30; mediumRatio = 0.30; hardRatio = 0.40;
+    }
+    
+    final easyCount = (count * easyRatio).round().clamp(0, _easyPool.length);
+    final hardCount = (count * hardRatio).round().clamp(0, _hardPool.length);
     final mediumCount = (count - easyCount - hardCount).clamp(0, _mediumPool.length);
     
     // Pick from each pool
@@ -149,61 +166,7 @@ class GameController {
     return shuffled.take(n).toList();
   }
 
-  /// Adapt difficulty based on current performance.
-  /// Called after each answer to potentially swap upcoming questions.
-  void _adaptDifficulty(bool isCorrect) {
-    if (isCorrect) {
-      _consecutiveCorrect++;
-      _consecutiveWrong = 0;
-      
-      // 2 consecutive correct → increase difficulty
-      if (_consecutiveCorrect >= 2 && _currentDifficulty < 3) {
-        _currentDifficulty++;
-        _consecutiveCorrect = 0;
-        _swapUpcomingQuestions();
-      }
-    } else {
-      _consecutiveWrong++;
-      _consecutiveCorrect = 0;
-      
-      // 2 consecutive wrong → decrease difficulty
-      if (_consecutiveWrong >= 2 && _currentDifficulty > 1) {
-        _currentDifficulty--;
-        _consecutiveWrong = 0;
-        _swapUpcomingQuestions();
-      }
-    }
-  }
 
-  /// Swap remaining upcoming questions to match current difficulty level.
-  void _swapUpcomingQuestions() {
-    final nextIdx = _currentIndex + 1;
-    if (nextIdx >= _questions.length) return;
-    
-    // Get the pool for current difficulty
-    List<Question> targetPool;
-    switch (_currentDifficulty) {
-      case 1: targetPool = _easyPool; break;
-      case 3: targetPool = _hardPool; break;
-      default: targetPool = _mediumPool; break;
-    }
-    
-    // Get IDs of questions already used in this session
-    final usedIds = _questions.take(nextIdx).map((q) => q.id).toSet();
-    
-    // Get available questions from target pool
-    final available = targetPool.where((q) => !usedIds.contains(q.id)).toList()..shuffle();
-    
-    if (available.isEmpty) return;
-    
-    // Replace upcoming questions with ones matching current difficulty
-    int availIdx = 0;
-    for (int i = nextIdx; i < _questions.length && availIdx < available.length; i++) {
-      if (_questions[i].difficulty != _currentDifficulty) {
-        _questions[i] = available[availIdx++];
-      }
-    }
-  }
 
   /// Check if the selected answer is correct and update ELO
   Future<bool> checkAnswer(String selectedAnswer) async {
@@ -232,10 +195,6 @@ class GameController {
       isCorrect: isCorrect,
       newElo: newElo,
     );
-    
-    // Adapt difficulty for next question
-    _adaptDifficulty(isCorrect);
-    
     return isCorrect;
   }
 
@@ -256,9 +215,6 @@ class GameController {
       isCorrect: false,
       newElo: newElo,
     );
-    
-    // Timeout counts as wrong for adaptation
-    _adaptDifficulty(false);
   }
 
   /// Move to next question
@@ -280,10 +236,7 @@ class GameController {
     _sessionScore = 0;
     _sessionCorrect = 0;
     _sessionWrong = 0;
-    _currentDifficulty = 1;
-    _consecutiveCorrect = 0;
-    _consecutiveWrong = 0;
-    _questions = _buildAdaptiveQuestionList(_questions.length > 0 ? _questions.length : 10);
+    _questions = _buildRankQuestionList(_questions.length > 0 ? _questions.length : 10);
   }
 
   /// Get session summary

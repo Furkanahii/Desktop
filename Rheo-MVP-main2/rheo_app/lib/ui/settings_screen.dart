@@ -6,6 +6,7 @@ import 'theme.dart';
 import 'animations.dart';
 import 'about_screen.dart';
 import 'feedback_dialog.dart';
+import '../data/app_strings.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -22,6 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _soundEnabled = soundService.isSoundEnabled;
+    _notificationsEnabled = notificationService.isEnabled;
   }
 
   void _showResetDialog() {
@@ -50,12 +52,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'İlerlemeyi Sıfırla?',
+                S.ilerlemeySifirlaTitle,
                 style: TextStyle(color: RheoTheme.textColor, fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Tüm ELO puanın, serilerin ve istatistiklerin silinecek. Bu işlem geri alınamaz.',
+                S.ilerlemeySifirlaMesaj,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: RheoTheme.textMuted, fontSize: 14),
               ),
@@ -68,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         HapticService.lightTap();
                         Navigator.pop(context);
                       },
-                      child: Text('İptal', style: TextStyle(color: RheoTheme.textMuted)),
+                      child: Text(S.iptal, style: TextStyle(color: RheoTheme.textMuted)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -82,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           setState(() {});
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('İlerleme sıfırlandı'),
+                              content: Text(S.ilerlemeSifirlandi),
                               backgroundColor: RheoColors.error,
                               behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -96,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Sıfırla'),
+                      child: Text(S.sifirla),
                     ),
                   ),
                 ],
@@ -122,7 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pop(context);
             },
           ),
-          title: Text('Ayarlar', style: TextStyle(color: RheoTheme.textColor)),
+          title: Text(S.ayarlar, style: TextStyle(color: RheoTheme.textColor)),
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -133,7 +135,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // Preferences Section
                 StaggeredFadeIn(
                   index: 0,
-                  child: _buildSectionHeader('Tercihler'),
+                  child: _buildSectionHeader(S.tr('Tercihler', 'Preferences')),
                 ),
                 const SizedBox(height: 12),
                 StaggeredFadeIn(
@@ -149,8 +151,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         _buildToggleTile(
                           icon: Icons.volume_up_rounded,
-                          title: 'Ses Efektleri',
-                          subtitle: 'Doğru/yanlış sesleri',
+                          title: S.sesEfektleri,
+                          subtitle: S.sesEfektleriSub,
                           value: _soundEnabled,
                           onChanged: (value) async {
                             HapticService.selectionClick();
@@ -161,19 +163,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Divider(height: 1, color: RheoTheme.brandCardBorder),
                         _buildToggleTile(
                           icon: Icons.notifications_active_outlined,
-                          title: 'Bildirimler',
-                          subtitle: 'Günlük hatırlatmalar (18:00)',
+                          title: S.bildirimler,
+                          subtitle: _notificationsEnabled 
+                            ? '${S.tr('Hatırlatma', 'Reminder')}: ${notificationService.hour.toString().padLeft(2, '0')}:${notificationService.minute.toString().padLeft(2, '0')}'
+                            : S.bildirimlerSub,
                           value: _notificationsEnabled,
                           onChanged: (value) async {
                             HapticService.selectionClick();
                             if (value) {
-                              final granted = await notificationService.requestPermissions();
-                              if (granted) {
-                                await notificationService.init();
-                                await notificationService.scheduleDailyReminder(
-                                  hour: 18,
-                                  minute: 0,
-                                );
+                              // Show time picker
+                              final time = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay(hour: notificationService.hour, minute: notificationService.minute),
+                                helpText: S.tr('Hatırlatma Saati', 'Reminder Time'),
+                              );
+                              if (time != null) {
+                                await notificationService.setEnabled(true);
+                                await notificationService.setReminderTime(time.hour, time.minute);
                                 setState(() => _notificationsEnabled = true);
                               }
                             } else {
@@ -185,12 +191,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Divider(height: 1, color: RheoTheme.brandCardBorder),
                         _buildToggleTile(
                           icon: Icons.dark_mode_rounded,
-                          title: 'Tema',
-                          subtitle: 'Koyu arka plan ve açık yazılar',
+                          title: S.tema,
+                          subtitle: S.temaSub,
                           value: storageService.progress.isDarkMode,
                           onChanged: (value) async {
                             HapticService.selectionClick();
                             storageService.progress.isDarkMode = value;
+                            await storageService.saveProgress(storageService.progress);
+                            setState(() {});
+                          },
+                        ),
+                        Divider(height: 1, color: RheoTheme.brandCardBorder),
+                        _buildToggleTile(
+                          icon: Icons.language_rounded,
+                          title: S.dil,
+                          subtitle: storageService.progress.locale == 'en' ? 'English' : 'Türkçe',
+                          value: storageService.progress.locale == 'en',
+                          onChanged: (value) async {
+                            HapticService.selectionClick();
+                            storageService.progress.locale = value ? 'en' : 'tr';
                             await storageService.saveProgress(storageService.progress);
                             setState(() {});
                           },
@@ -205,7 +224,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // Feedback Section
                 StaggeredFadeIn(
                   index: 4,
-                  child: _buildSectionHeader('Geri Bildirim'),
+                  child: _buildSectionHeader(S.geriBildirim),
                 ),
                 const SizedBox(height: 12),
                 StaggeredFadeIn(
@@ -221,8 +240,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         _buildActionTile(
                           icon: Icons.feedback_outlined,
-                          title: 'Geri Bildirim Gönder',
-                          subtitle: 'Önerilerinizi paylaşın',
+                          title: S.geriBildirim,
+                          subtitle: S.geriBildirimSub,
                           color: RheoColors.primary,
                           onTap: () {
                             HapticService.lightTap();
@@ -237,7 +256,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // About Section
                 StaggeredFadeIn(
                   index: 6,
-                  child: _buildSectionHeader('Hakkında'),
+                  child: _buildSectionHeader(S.hakkinda),
                 ),
                 const SizedBox(height: 12),
                 StaggeredFadeIn(
@@ -254,9 +273,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         _buildAboutTile(context),
                         Divider(color: RheoTheme.brandCardBorder, height: 1),
-                        _buildInfoTile('Versiyon', '1.0.0 Beta'),
+                        _buildInfoTile(S.versiyon, '1.0.0 Beta'),
                         Divider(color: RheoTheme.brandCardBorder, height: 1),
-                        _buildInfoTile('İletişim', 'team@rheo.app'),
+                        _buildInfoTile(S.iletisim, 'rheocode.app@gmail.com'),
                       ],
                     ),
                   ),
@@ -286,7 +305,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '© 2026 • Kod Okuma Oyunu',
+                          '© 2026 • ${S.kodOkumaOyunu}',
                           style: TextStyle(color: RheoTheme.brandMuted, fontSize: 12),
                         ),
                       ],
@@ -397,8 +416,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         child: Icon(Icons.info_outline_rounded, color: RheoColors.primary, size: 22),
       ),
-      title: Text('Hakkımızda', style: TextStyle(color: RheoTheme.textColor, fontWeight: FontWeight.w500)),
-      subtitle: Text('Ekip ve uygulama bilgileri', style: TextStyle(color: RheoTheme.brandMuted, fontSize: 12)),
+      title: Text(S.hakkimizda, style: TextStyle(color: RheoTheme.textColor, fontWeight: FontWeight.w500)),
+      subtitle: Text(S.hakkimizdaSub, style: TextStyle(color: RheoTheme.brandMuted, fontSize: 12)),
       trailing: Icon(Icons.arrow_forward_ios_rounded, color: RheoColors.primary.withAlpha(150), size: 16),
     );
   }

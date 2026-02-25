@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
+import 'package:flutter_highlight/themes/atom-one-light.dart';
 import '../logic/game_controller.dart';
 import '../logic/elo_calculator.dart';
 import '../logic/sound_service.dart';
@@ -10,6 +11,7 @@ import '../logic/ai_service.dart';
 import 'theme.dart';
 import 'animations.dart';
 import 'widgets/mascot_widget.dart';
+import '../data/app_strings.dart';
 
 class QuizScreen extends StatefulWidget {
   final String? topic;
@@ -116,11 +118,11 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           final errorDetail = aiService.lastError;
           String errorMsg;
           if (errorDetail != null && errorDetail.contains('quota')) {
-            errorMsg = 'API kota limiti aşıldı.\nBirkaç dakika bekleyip tekrar dene.';
+            errorMsg = S.apiKotaHatasi;
           } else if (errorDetail != null && errorDetail.contains('API key')) {
-            errorMsg = 'API key geçersiz.\n.env dosyasını kontrol et.';
+            errorMsg = S.apiKeyHatasi;
           } else {
-            errorMsg = 'AI sorusu üretilemedi.\nİnternet bağlantını kontrol et.';
+            errorMsg = S.aiSoruHatasi;
           }
           setState(() {
             _isGeneratingAI = false;
@@ -262,21 +264,21 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Quiz Bitti! 🎉', 
+              Text(S.tr('Quiz Bitti! 🎉', 'Quiz Complete! 🎉'), 
                 style: TextStyle(color: RheoTheme.textColor, fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               MascotResultCard(accuracy: summary['accuracy']),
               const SizedBox(height: 12),
-              _buildStatRow('Skor', '${summary['score']}', Colors.amber),
-              _buildStatRow('Doğru', '${summary['correct']}', RheoColors.success),
-              _buildStatRow('Yanlış', '${summary['wrong']}', RheoColors.error),
-              _buildStatRow('Başarı', '%${summary['accuracy']}', RheoColors.primary),
+              _buildStatRow(S.tr('Skor', 'Score'), '${summary['score']}', Colors.amber),
+              _buildStatRow(S.dogru, '${summary['correct']}', RheoColors.success),
+              _buildStatRow(S.yanlis, '${summary['wrong']}', RheoColors.error),
+              _buildStatRow(S.basari, '%${summary['accuracy']}', RheoColors.primary),
               Divider(color: RheoTheme.textMuted.withAlpha(60), height: 24),
               _buildStatRow('ELO', '${summary['elo']}', 
                   Color(EloCalculator.getRankColor(summary['elo']))),
               _buildStatRow('Rank', summary['rank'], 
                   Color(EloCalculator.getRankColor(summary['elo']))),
-              _buildStatRow('Seri', '🔥 ${summary['streak']}', RheoColors.secondary),
+              _buildStatRow(S.tr('Seri', 'Streak'), '🔥 ${summary['streak']}', RheoColors.secondary),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -287,7 +289,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                         Navigator.pop(context);
                         Navigator.pop(context);
                       },
-                      child: Text('Ana Sayfa', style: TextStyle(color: RheoTheme.textMuted)),
+                      child: Text(S.tr('Ana Sayfa', 'Home'), style: TextStyle(color: RheoTheme.textMuted)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -297,7 +299,11 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                         HapticService.lightTap();
                         Navigator.pop(context);
                         setState(() => _isLoading = true);
-                        await _controller.loadQuestions(maxQuestions: 10);
+                        await _controller.loadQuestions(
+                          maxQuestions: 10,
+                          language: languageService.selected.name,
+                          topic: widget.topic,
+                        );
                         _controller.reset();
                         _prepareQuestion();
                         setState(() => _isLoading = false);
@@ -308,7 +314,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Tekrar Oyna'),
+                      child: Text(S.tr('Tekrar Oyna', 'Play Again')),
                     ),
                   ),
                 ],
@@ -336,17 +342,17 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   }
 
   Color _getButtonColor(String option) {
-    if (_selectedAnswer == null) return RheoTheme.cardBg;
+    if (_selectedAnswer == null) return RheoTheme.optionBg;
     if (option == _controller.currentQuestion?.correctAnswer) return RheoColors.success.withAlpha(30);
     if (option == _selectedAnswer && !_isCorrect!) return RheoColors.error.withAlpha(30);
-    return RheoTheme.cardBg;
+    return RheoTheme.optionBg;
   }
 
   Color _getButtonBorder(String option) {
-    if (_selectedAnswer == null) return RheoTheme.buttonBorder;
+    if (_selectedAnswer == null) return RheoTheme.optionBorder;
     if (option == _controller.currentQuestion?.correctAnswer) return RheoColors.success;
     if (option == _selectedAnswer && !_isCorrect!) return RheoColors.error;
-    return RheoTheme.buttonBorder;
+    return RheoTheme.optionBorder;
   }
 
   @override
@@ -371,7 +377,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Soru $_aiQuestionCount/$_aiMaxQuestions',
+                    S.soruN(_aiQuestionCount, _aiMaxQuestions),
                     style: TextStyle(color: RheoTheme.textMuted.withAlpha(120), fontSize: 12),
                   ),
                 ],
@@ -414,7 +420,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                     });
                   },
                   icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Tekrar Dene'),
+                  label: Text(S.tekrarDeneButon),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: RheoColors.primary,
                     foregroundColor: RheoTheme.textColor,
@@ -433,7 +439,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     if (question == null) {
       return Scaffold(
         backgroundColor: RheoTheme.scaffoldBg(),
-        body: Center(child: Text('Soru yok', style: TextStyle(color: RheoTheme.textMuted))),
+        body: Center(child: Text(S.tr('Soru yok', 'No questions'), style: TextStyle(color: RheoTheme.textMuted))),
       );
     }
 
@@ -451,8 +457,8 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           ),
           title: Text(
             _isAIMode 
-                ? '🤖 Soru $_aiQuestionCount/$_aiMaxQuestions'
-                : 'Soru ${_controller.currentIndex + 1}/${_controller.totalQuestions}',
+                ? '🤖 ${S.tr('Soru', 'Question')} $_aiQuestionCount/$_aiMaxQuestions'
+                : S.soruN(_controller.currentIndex + 1, _controller.totalQuestions),
             style: TextStyle(color: RheoTheme.textColor, fontSize: 16),
           ),
           actions: [
@@ -494,7 +500,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
             ),
             
             SafeArea(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -547,27 +553,71 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                           );
                         },
                         child: Container(
+                          constraints: const BoxConstraints(maxHeight: 260),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            color: RheoTheme.codeBg,
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color: _selectedAnswer == null 
-                                  ? RheoTheme.buttonBorder
-                                  : (_isCorrect! ? RheoColors.success : RheoColors.error),
+                                  ? RheoTheme.codeBorder
+                                  : (_isCorrect! ? RheoColors.success.withAlpha(150) : RheoColors.error.withAlpha(150)),
                               width: _selectedAnswer == null ? 1 : 2,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(30),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(11),
-                            child: HighlightView(
-                              question.codeSnippet,
-                              language: 'python',
-                              theme: atomOneDarkTheme,
-                              padding: const EdgeInsets.all(16),
-                              textStyle: const TextStyle(
-                                fontFamily: 'monospace',
-                                fontSize: 14,
-                                height: 1.5,
-                              ),
+                            borderRadius: BorderRadius.circular(13),
+                            child: Column(
+                              children: [
+                                // Terminal header
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: RheoTheme.codeHeaderBg,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(width: 10, height: 10, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFf38ba8))),
+                                      const SizedBox(width: 6),
+                                      Container(width: 10, height: 10, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFf9e2af))),
+                                      const SizedBox(width: 6),
+                                      Container(width: 10, height: 10, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFa6e3a1))),
+                                      const Spacer(),
+                                      Text(
+                                        question.language.toUpperCase(),
+                                        style: TextStyle(
+                                          color: RheoTheme.codeHeaderText,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Code content
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    child: HighlightView(
+                                      question.codeSnippet,
+                                      language: question.language,
+                                      theme: RheoTheme.isDark ? atomOneDarkTheme : atomOneLightTheme,
+                                      padding: const EdgeInsets.all(14),
+                                      textStyle: const TextStyle(
+                                        fontFamily: 'monospace',
+                                        fontSize: 13,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -577,7 +627,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                     
                     // Question text
                     Text(
-                      question.questionText,
+                      question.localizedQuestionText,
                       style: TextStyle(
                         fontSize: 16,
                         color: RheoTheme.textColor,
@@ -588,44 +638,39 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                     const SizedBox(height: 16),
                     
                     // Answer options
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _shuffledOptions.length,
-                        itemBuilder: (context, index) {
-                          final option = _shuffledOptions[index];
-                          return StaggeredFadeIn(
-                            index: index,
-                            delay: const Duration(milliseconds: 80),
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: _selectedAnswer == null 
-                                      ? () => _onAnswerSelected(option) 
-                                      : null,
+                    ...List.generate(_shuffledOptions.length, (index) {
+                      final option = _shuffledOptions[index];
+                      return StaggeredFadeIn(
+                        index: index,
+                        delay: const Duration(milliseconds: 80),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _selectedAnswer == null 
+                                  ? () => _onAnswerSelected(option) 
+                                  : null,
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: _getButtonColor(option),
                                   borderRadius: BorderRadius.circular(12),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(14),
-                                    decoration: BoxDecoration(
-                                      color: _getButtonColor(option),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: _getButtonBorder(option)),
-                                    ),
-                                    child: Text(
-                                      option,
-                                      style: TextStyle(fontSize: 15, color: RheoTheme.textColor),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
+                                  border: Border.all(color: _getButtonBorder(option)),
+                                ),
+                                child: Text(
+                                  option,
+                                  style: TextStyle(fontSize: 15, color: RheoTheme.textColor),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
-                          );
-                        },
-                      ),
-                    ),
-                    
+                          ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 16),
 
                   ],
                 ),
@@ -650,7 +695,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                           const Spacer(flex: 2),
                           // Result text
                           Text(
-                            _isCorrect! ? 'Doğru Cevap!' : 'Yanlış Cevap!',
+                            _isCorrect! ? S.dogruCevap : S.yanlisCevap,
                             style: TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w900,
@@ -692,7 +737,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                           Padding(
                             padding: const EdgeInsets.only(bottom: 24),
                             child: Text(
-                              'İlerlemek için tıklayınız.',
+                              S.ilerlemekIcinTikla,
                               style: TextStyle(
                                 fontSize: 13,
                                 color: RheoColors.textMuted,
@@ -722,9 +767,9 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
 
   String _getDifficultyLabel(int difficulty) {
     switch (difficulty) {
-      case 1: return 'KOLAY';
-      case 2: return 'ORTA';
-      case 3: return 'ZOR';
+      case 1: return S.tr('KOLAY', 'EASY');
+      case 2: return S.tr('ORTA', 'MEDIUM');
+      case 3: return S.tr('ZOR', 'HARD');
       default: return '?';
     }
   }

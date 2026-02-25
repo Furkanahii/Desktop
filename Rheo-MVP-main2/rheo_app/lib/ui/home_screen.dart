@@ -15,6 +15,7 @@ import 'leaderboard_screen.dart';
 import 'topic_dialog.dart';
 import 'profile_screen.dart';
 import 'initial_rank_screen.dart';
+import '../data/app_strings.dart';
 
 /// Language-specific accent colors (text) — delegates to RheoTheme
 Color _langAccent(ProgrammingLanguage lang) => RheoTheme.langText(lang);
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20)),
               title: Text(
-                'Günlük Hedef',
+                S.gunlukHedef,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: RheoTheme.textColor,
@@ -99,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Günde kaç soru çözmek istiyorsun?',
+                    S.gundeSoruSayisi,
                     style: TextStyle(color: RheoTheme.textMuted, fontSize: 14),
                   ),
                   const SizedBox(height: 20),
@@ -145,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text('İptal',
+                  child: Text(S.iptal,
                       style: TextStyle(color: RheoTheme.textMuted)),
                 ),
                 ElevatedButton(
@@ -163,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Kaydet'),
+                  child: Text(S.kaydet),
                 ),
               ],
             );
@@ -224,10 +225,78 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     // Action buttons (right)
-                    IconButton(
-                      icon: Icon(Icons.emoji_events_outlined, color: RheoTheme.textColor),
-                      onPressed: () => _navigateTo(const LeaderboardScreen()),
-                      tooltip: 'Sıralama',
+                    Stack(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.emoji_events_outlined, color: RheoTheme.textColor),
+                          onPressed: () {
+                            HapticService.lightTap();
+                            showDialog(
+                              context: context,
+                              barrierColor: RheoTheme.textColor.withAlpha(100),
+                              builder: (context) => Center(
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 24),
+                                    decoration: BoxDecoration(
+                                      color: RheoTheme.cardBg,
+                                      borderRadius: BorderRadius.circular(30),
+                                      border: Border.all(color: RheoTheme.textColor.withAlpha(60), width: 2),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: RheoTheme.textColor.withAlpha(20),
+                                          blurRadius: 24,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.emoji_events_outlined, color: RheoTheme.textColor, size: 36),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          S.tr('Çok Yakında! 🚀', 'Coming Soon! 🚀'),
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: RheoTheme.textColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          S.tr('Sıralama sistemi geliyor...', 'Leaderboard coming soon...'),
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: RheoTheme.textMuted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          tooltip: S.tr('Sıralama', 'Leaderboard'),
+                        ),
+                        Positioned(
+                          right: 2,
+                          top: 2,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: RheoColors.secondary,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              S.tr('Yakında', 'Soon'),
+                              style: const TextStyle(fontSize: 7, color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     IconButton(
                       icon: Icon(Icons.settings, color: RheoTheme.textColor),
@@ -328,7 +397,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Icon(Icons.shield_outlined, color: RheoTheme.textColor, size: 24),
                             const SizedBox(height: 4),
                             Text(
-                              'Lig',
+                              S.lig,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -337,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Yakında',
+                              S.yakinda,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: RheoTheme.textMuted,
@@ -364,7 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Doğru Seri',
+                              S.dogruSeri,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: RheoTheme.textMuted,
@@ -411,7 +480,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Row(
                                     children: [
                                       Text(
-                                        'Günlük Hedef',
+                                        S.gunlukHedef,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
@@ -469,7 +538,7 @@ class _HomeScreenState extends State<HomeScreen> {
               StaggeredFadeIn(
                 index: 4,
                 child: Text(
-                  'MOD SEÇ',
+                  S.modSec,
                   style: TextStyle(
                     color: RheoTheme.textColor.withAlpha(120),
                     fontSize: 12,
@@ -487,8 +556,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   accentColor: accent,
                   cardBg: cardBg,
                   icon: Icons.code_rounded,
-                  title: 'Çıktı Tahmini',
-                  subtitle: 'Kodu oku, çıktıyı tahmin et',
+                  title: S.ciktiTahmini,
+                  subtitle: S.ciktiTahminiSub,
                   onTap: () async {
                     final selectedTopic = await showTopicDialog(context);
                     if (selectedTopic != null && mounted) {
@@ -509,8 +578,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   accentColor: accent,
                   cardBg: cardBg,
                   icon: Icons.bug_report_rounded,
-                  title: 'Bug Hunter',
-                  subtitle: 'Hatalı satırı bul',
+                  title: S.bugHunter,
+                  subtitle: S.bugHunterSub,
                   onTap: () => _navigateTo(const BugHuntScreen()),
                 ),
               ),
@@ -523,8 +592,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   accentColor: accent,
                   cardBg: cardBg,
                   icon: Icons.timer_rounded,
-                  title: 'Time Attack',
-                  subtitle: 'Zamana karşı yarış',
+                  title: S.timeAttack,
+                  subtitle: S.timeAttackSub,
                   onTap: () => _navigateTo(const TimeAttackScreen()),
                 ),
               ),
@@ -535,7 +604,7 @@ class _HomeScreenState extends State<HomeScreen> {
               StaggeredFadeIn(
                 index: 8,
                 child: Text(
-                  '${progress.totalQuestions} soru çözüldü',
+                  S.soruCozuldu(progress.totalQuestions),
                   style: TextStyle(color: RheoTheme.textColor.withAlpha(100), fontSize: 13),
                 ),
               ),
@@ -924,7 +993,7 @@ class _DailyGoalHoverButtonState extends State<_DailyGoalHoverButton> {
               Text('🎯', style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
               Text(
-                'Günlük hedefini belirle!',
+                S.gunlukHedefBelirle,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,

@@ -13,6 +13,7 @@ class UserProgress {
   String nickname;
   bool hasSelectedInitialRank;
   bool isDarkMode;
+  String locale;
 
   UserProgress({
     this.elo = 100,
@@ -27,6 +28,7 @@ class UserProgress {
     this.nickname = 'Oyuncu',
     this.hasSelectedInitialRank = false,
     this.isDarkMode = false,
+    this.locale = 'tr',
   });
 
   /// Total questions answered
@@ -81,6 +83,7 @@ class UserProgress {
       'nickname': nickname,
       'hasSelectedInitialRank': hasSelectedInitialRank,
       'isDarkMode': isDarkMode,
+      'locale': locale,
     };
   }
 
@@ -101,6 +104,7 @@ class UserProgress {
       nickname: map['nickname'] ?? 'Oyuncu',
       hasSelectedInitialRank: map['hasSelectedInitialRank'] ?? false,
       isDarkMode: map['isDarkMode'] ?? false,
+      locale: map['locale'] ?? 'tr',
     );
   }
 }

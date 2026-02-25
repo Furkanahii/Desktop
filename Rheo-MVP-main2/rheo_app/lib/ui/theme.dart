@@ -113,6 +113,40 @@ class RheoTheme {
 
   // ── Brand card border ──
   static Color get brandCardBorder => isDark ? brandCyan.withAlpha(60) : brandBlue.withAlpha(40);
+
+  // ── Code block colors (for quiz/bug-hunt/time-attack screens) ──
+  static Color get codeBg => isDark
+      ? const Color(0xFF1E1E2E)   // Catppuccin Mocha base
+      : const Color(0xFFF5F5F9);  // Soft lavender-gray
+
+  static Color get codeHeaderBg => isDark
+      ? const Color(0xFF181825)   // Catppuccin Mocha mantle
+      : const Color(0xFFEBEBF2);  // Slightly darker header
+
+  static Color get codeBorder => isDark
+      ? const Color(0xFF313244)   // Catppuccin Mocha surface0
+      : const Color(0xFFD0D0DD);  // Subtle cool border
+
+  static Color get codeLineNumber => isDark
+      ? const Color(0xFF585b70)   // Catppuccin Mocha overlay0
+      : const Color(0xFF9090A0);  // Muted number color
+
+  static Color get codeHeaderText => isDark
+      ? const Color(0xFF6c7086)   // Catppuccin Mocha overlay1
+      : const Color(0xFF8080A0);  // Muted header text
+
+  // ── Answer option colors (transparent glass style) ──
+  static Color get optionBg => isDark
+      ? const Color(0x14FFFFFF)   // 8% white (same as glassLight)
+      : const Color(0x18000000);  // ~9% black — subtle on light bg
+
+  static Color get optionBorder => isDark
+      ? const Color(0x1AFFFFFF)   // 10% white (same as glassBorder)
+      : const Color(0x22000000);  // ~13% black
+
+  static Color get optionText => isDark
+      ? Colors.white
+      : Colors.black;
 }
 
 /// Legacy color constants (kept for backward compatibility)

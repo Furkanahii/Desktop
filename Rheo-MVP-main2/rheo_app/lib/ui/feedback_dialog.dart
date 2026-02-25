@@ -17,7 +17,7 @@ class FeedbackDialog extends StatelessWidget {
   Future<void> _sendEmail() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'team@rheo.app',
+      path: 'rheocode.app@gmail.com',
       queryParameters: {
         'subject': 'Rheo Feedback',
         'body': 'Uygulama: Rheo v1.0.0\n\n---\nMesajınız:\n',
